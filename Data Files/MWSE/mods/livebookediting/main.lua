@@ -3,7 +3,7 @@ local config = require("livebookediting.config").config
 
 local log = logger.new({
 	name = "livebookediting",
-	--outputFile = "livebookediting.log",
+	-- outputFile = "livebookediting.log",
 	logLevel = config.logLevel,
 })
 
@@ -14,30 +14,9 @@ dofile("livebookediting.mcm")
 local i18n = mwse.loadTranslations("livebookediting")
 local id = util.id
 local paths = {
-	book = tes3.installDirectory .. "\\data files\\booktext.txt",
-	scroll = tes3.installDirectory .. "\\data files\\scrolltext.txt",
+	[id.book] = tes3.installDirectory .. "\\data files\\booktext.txt",
+	[id.scroll] = tes3.installDirectory .. "\\data files\\scrolltext.txt",
 }
-
---- Reads the contents of a text file and returns it as a string.
---- Also returns true if the text is missing <br> at the end.
----@param path string
----@return string
-local function loadFile(path)
-	if not lfs.fileexists(path) then
-		log:error("Couldn't open file at: \"%s\"", path)
-		return i18n("defaultText")
-	end
-	local file = io.open(path, "r")
-	if not file then
-		log:error("Couldn't open file at: \"%s\"", path)
-		return i18n("defaultText")
-	end
-	local buffer = tostring(file:read("*a"))
-	file:close()
-	log:debug("Read from %s:\n%s", path, buffer)
-
-	return buffer
-end
 
 --- Checks if there is missing \<br> statement at the end.
 --- Will show a messageBox if it is missing.
@@ -49,6 +28,32 @@ local function checkMissingLineBreak(text)
 	end
 end
 
+--- Reads the contents of a text file and returns it as a string.
+--- Also returns true if the text is missing <br> at the end.
+---@param path string
+---@return string
+local function loadFile(path)
+	if not lfs.fileexists(path) then
+		local msg = string.format("File doesn't exist: \"%s\". Loading default text.", path)
+		tes3.messageBox(msg)
+		log:error(msg)
+		return i18n("defaultText")
+	end
+	local file = io.open(path, "r")
+	if not file then
+		local msg = string.format("Couldn't open file at: \"%s\". Loading default text.", path)
+		tes3.messageBox(msg)
+		log:error(msg)
+		return i18n("defaultText")
+	end
+	local buffer = tostring(file:read("*a"))
+	file:close()
+	log:debug("Read from %s:\n%s", path, buffer)
+
+	checkMissingLineBreak(buffer)
+	return buffer
+end
+
 ---@alias livebookeditingBookType
 ---| "book"
 ---| "scroll"
@@ -57,9 +62,8 @@ end
 --- there is missing \<br> statement at the end.
 ---@param bookType livebookeditingBookType
 local function showText(bookType)
-	local text = loadFile(paths[bookType])
+	local text = loadFile(paths[id[bookType]])
 
-	checkMissingLineBreak(text)
 	if bookType == "book" then
 		tes3ui.showBookMenu(text)
 	elseif bookType == "scroll" then
@@ -67,27 +71,32 @@ local function showText(bookType)
 	end
 end
 
+---@param actual keyDownEventData
+---@param expected mwseKeyCombo
+---@return boolean
+local function canOpenBook(actual, expected)
+	if tes3.onMainMenu() then
+		tes3.messageBox(i18n("loadBefore"))
+		return false
+	end
+
+	if not tes3.isKeyEqual({ actual = actual, expected = expected }) then
+		return false
+	end
+
+	return true
+end
 
 ---@param e keyDownEventData
 local function openBook(e)
-	local equal = tes3.isKeyEqual({
-		actual = e,
-		expected = config.bookKey
-	})
-	if not equal then return end
-
+	if not canOpenBook(e, config.bookKey) then return end
 	showText("book")
 end
 event.register(tes3.event.keyDown, openBook, { filter = config.bookKey.keyCode })
 
 ---@param e keyDownEventData
 local function openScrool(e)
-	local equal = tes3.isKeyEqual({
-		actual = e,
-		expected = config.scrollKey
-	})
-	if not equal then return end
-
+	if not canOpenBook(e, config.scrollKey) then return end
 	showText("scroll")
 end
 event.register(tes3.event.keyDown, openScrool, { filter = config.scrollKey.keyCode })
@@ -96,15 +105,11 @@ event.register(tes3.event.keyDown, openScrool, { filter = config.scrollKey.keyCo
 ---@param e bookGetTextEventData
 local function onGetText(e)
 	local bookid = e.book.id
-	if bookid == id.book then
-		local text = loadFile(paths.book)
-		checkMissingLineBreak(text)
-		e.text = text
-	elseif bookid == id.scroll then
-		local text = loadFile(paths.scroll)
-		checkMissingLineBreak(text)
-		e.text = text
-	end
+	local path = paths[bookid]
+	if not path then return end
+
+	local text = loadFile(path)
+	e.text = text
 end
 event.register(tes3.event.bookGetText, onGetText)
 

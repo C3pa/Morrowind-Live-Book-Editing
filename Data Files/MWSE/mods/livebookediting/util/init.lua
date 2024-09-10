@@ -60,10 +60,10 @@ function util.addItem(bookType)
 			showMessage = true,
 		})
 		return true
-	else
-		tes3.messageBox(i18n("alreadyAdded"))
-		return false
 	end
+
+	tes3.messageBox(i18n("alreadyAdded"))
+	return false
 end
 
 return util

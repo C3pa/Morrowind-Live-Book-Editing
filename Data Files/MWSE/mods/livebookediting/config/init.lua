@@ -22,7 +22,7 @@ local defaultConfig = {
 
 local cachedConfig = mwse.loadConfig(configFile, defaultConfig)
 local this = {
-	version = "1.0.0",
+	version = "1.0.1",
 	---@type livebookeditingModConfigTable
 	config = {},
 	default = defaultConfig,

@@ -1,7 +1,7 @@
 				Live Book Editing
 				By C3pa
 
-Version: 1.0
+Version: 1.0.1
 
 _________
 Contents
@@ -43,9 +43,10 @@ Modify my mod, but credit me as the original creator.
 ____________
 Changelog
 ____________
-1.0
+1.0.0
 Initial Release
-
+1.0.1
+Bugfix: Prevents CTD on opening a book menu on main menu.
 ________
 Contact
 ________

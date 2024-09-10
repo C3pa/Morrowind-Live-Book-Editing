@@ -1,7 +1,8 @@
 return {
 	["defaultText"] = "Lorem ipsum\n<br>",
 	["missingLineBreakText"] = "Current book's text is missing a <br> tag at the end. It's text might not show up properly.",
-	["loadNeeded"] = "You need to load a character to perfrom this action.",
+	["loadNeeded"] = "You need to load a character to perform this action.",
+	["loadBefore"] = "You need to load a character to open book/scroll text preview.",
 	["alreadyAdded"] = "Your current character already has that book.",
 
 	-- Put all the mcm strings here.
