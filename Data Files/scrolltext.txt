@@ -1,0 +1,8 @@
+<font color="000000" size="2" face="Magic Cards">
+
+<div align="center>
+Welcome to Live Book Editing!
+
+Edit scroll text in your favourite text editor and preview your changes in-game! After you are done, you can just copy and paste the text to scroll's Book Text field in the Construction Set.
+
+<br>
